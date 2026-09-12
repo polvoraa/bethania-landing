@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#191816">
+  <title>Editor visual | Bethania Saraiva</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #191816;
+      --panel: #22211e;
+      --panel-raised: #292824;
+      --line: #3b3933;
+      --muted: #a8a49b;
+      --text: #f2eee5;
+      --accent: #c56d42;
+      --accent-strong: #df8457;
+      --danger: #d07168;
+      --sans: "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: var(--sans);
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    button, input, select { font: inherit; }
+
+    button { color: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr);
+      height: 100dvh;
+    }
+
+    .topbar {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(230px, 1fr) auto minmax(230px, 1fr);
+      align-items: center;
+      gap: 18px;
+      padding: 0 18px;
+      background: #1e1d1a;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand { min-width: 0; }
+    .brand strong { display: block; font-size: 13px; letter-spacing: .01em; }
+    .brand span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+
+    .toolbar, .actions, .segmented { display: flex; align-items: center; gap: 6px; }
+    .actions { justify-self: end; }
+
+    .tool-button, .viewport-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+    }
+
+    .tool-button:hover, .viewport-button:hover { background: var(--panel-raised); border-color: #555149; }
+    .tool-button:active, .viewport-button:active { transform: translateY(1px) scale(.98); }
+    .tool-button:disabled { opacity: .4; cursor: not-allowed; }
+    .tool-button.primary { color: #21150e; background: var(--accent-strong); border-color: var(--accent-strong); font-weight: 650; }
+    .viewport-button[aria-pressed="true"] { color: #201711; background: var(--accent); border-color: var(--accent); }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      min-height: 0;
+    }
+
+    .stage {
+      position: relative;
+      min-width: 0;
+      overflow: auto;
+      background-color: #11110f;
+      background-image: radial-gradient(circle, #36342f 1px, transparent 1px);
+      background-size: 18px 18px;
+    }
+
+    .stage__inner {
+      display: flex;
+      min-width: max-content;
+      min-height: 100%;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px 34px 80px;
+    }
+
+    .browser {
+      width: min(1440px, calc(100vw - 390px));
+      min-width: 320px;
+      height: calc(100dvh - 110px);
+      min-height: 540px;
+      background: #fff;
+      border: 1px solid #4a4741;
+      border-radius: 12px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, .28);
+      overflow: hidden;
+      transition: width .35s cubic-bezier(.16, 1, .3, 1);
+    }
+
+    iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+
+    .inspector {
+      min-height: 0;
+      padding: 18px;
+      background: var(--panel);
+      border-left: 1px solid var(--line);
+      overflow-y: auto;
+    }
+
+    .selection {
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow { margin: 0 0 7px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .selection__name { margin: 0; font-size: 17px; font-weight: 650; line-height: 1.25; }
+    .selection__selector { margin: 6px 0 0; color: var(--accent-strong); font: 11px/1.4 Consolas, monospace; overflow-wrap: anywhere; }
+
+    .empty {
+      padding: 28px 6px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .empty strong { color: var(--text); }
+
+    .controls[hidden], .empty[hidden] { display: none; }
+
+    .control-section { padding: 17px 0; border-bottom: 1px solid var(--line); }
+    .control-section h2 { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .field-grid.one { grid-template-columns: 1fr; }
+    .button-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .button-grid .tool-button { width: 100%; }
+    .inline-check { display: flex; align-items: center; gap: 8px; margin-top: 11px; color: var(--text); }
+    .inline-check input { width: 15px; min-height: 15px; accent-color: var(--accent); }
+    .conditional[hidden] { display: none; }
+
+    label { display: grid; gap: 5px; min-width: 0; color: var(--muted); font-size: 11px; }
+
+    input, select {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 9px;
+      color: var(--text);
+      background: #191816;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      outline: none;
+    }
+
+    input:focus, select:focus { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    input::placeholder { color: #716e66; }
+    .hint { margin: 10px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .inspector-actions { display: grid; gap: 8px; padding-top: 17px; }
+    .inspector-actions .tool-button { width: 100%; }
+    .inspector-actions .danger { color: #f0b1aa; }
+
+    .toast {
+      position: fixed;
+      left: 24px;
+      bottom: 22px;
+      max-width: min(420px, calc(100vw - 48px));
+      padding: 12px 15px;
+      color: var(--text);
+      background: #302e29;
+      border: 1px solid #4f4b43;
+      border-radius: 9px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, .24);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .toast.is-visible { opacity: 1; transform: translateY(0); }
+
+    .status-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 6px;
+      background: #6fa17b;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 900px) {
+      .topbar { grid-template-columns: 1fr auto; }
+      .toolbar { display: none; }
+      .workspace { grid-template-columns: minmax(0, 1fr) 280px; }
+      .brand span { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <strong>Editor visual</strong>
+        <span><span class="status-dot"></span>alterações salvas neste navegador</span>
+      </div>
+
+      <div class="toolbar" aria-label="Tamanho da visualização">
+        <div class="segmented">
+          <button class="viewport-button" type="button" data-viewport="1440" aria-pressed="true">Desktop</button>
+          <button class="viewport-button" type="button" data-viewport="768" aria-pressed="false">Tablet</button>
+          <button class="viewport-button" type="button" data-viewport="390" aria-pressed="false">Celular</button>
+        </div>
+        <button class="tool-button" id="reloadButton" type="button">Recarregar</button>
+      </div>
+
+      <div class="actions">
+        <button class="tool-button" id="undoButton" type="button" disabled>Desfazer</button>
+        <button class="tool-button" id="downloadButton" type="button">Baixar HTML</button>
+        <button class="tool-button primary" id="applyButton" type="button">Aplicar no index.html</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <main class="stage">
+        <div class="stage__inner">
+          <div class="browser" id="browserFrame">
+            <iframe id="pageFrame" src="index.html" title="Pré-visualização editável do site"></iframe>
+          </div>
+        </div>
+      </main>
+
+      <aside class="inspector" aria-label="Propriedades do elemento">
+        <div class="selection">
+          <p class="eyebrow">Elemento selecionado</p>
+          <p class="selection__name" id="selectionName">Nenhum</p>
+          <p class="selection__selector" id="selectionSelector">Clique em algo na página</p>
+        </div>
+
+        <div class="empty" id="emptyState">
+          <strong>Selecione qualquer elemento</strong><br>
+          Clique em um texto, imagem, seção ou container. Ao clicar em uma imagem, o editor seleciona a moldura dela. Use Alt + clique para selecionar apenas a imagem interna.
+        </div>
+
+        <div class="controls" id="controls" hidden>
+          <section class="control-section">
+            <h2>Contexto</h2>
+            <div class="field-grid one">
+              <label>Aplicar em
+                <select id="breakpoint">
+                  <option value="base">Todos os tamanhos</option>
+                  <option value="tablet">Tablet e celular (até 900 px)</option>
+                  <option value="mobile">Somente celular (até 600 px)</option>
+                </select>
+              </label>
+            </div>
+            <div class="button-grid" style="margin-top: 10px">
+              <button class="tool-button" id="selectParentButton" type="button">Selecionar pai</button>
+              <button class="tool-button" id="selectChildButton" type="button">Selecionar filho</button>
+            </div>
+          </section>
+
+          <section class="control-section conditional" id="imageControls" hidden>
+            <h2>Imagem</h2>
+            <div class="field-grid one">
+              <label>Arquivo ou endereço
+                <input id="imageSource" placeholder="assets/nova-imagem.jpg">
+              </label>
+              <label>Descrição alternativa
+                <input id="imageAlt" placeholder="Descrição da imagem">
+              </label>
+            </div>
+            <div class="button-grid" style="margin-top: 10px">
+              <button class="tool-button primary" id="replaceImageButton" type="button">Escolher imagem</button>
+              <button class="tool-button" id="restoreImageButton" type="button">Restaurar imagem</button>
+            </div>
+            <p class="hint">A imagem escolhida fica incorporada ao HTML exportado. Para usar um arquivo da pasta assets, informe o caminho acima.</p>
+          </section>
+
+          <section class="control-section">
+            <h2>Tamanho</h2>
+            <div class="field-grid">
+              <label>Largura <input data-property="width" placeholder="auto"></label>
+              <label>Altura <input data-property="height" placeholder="auto"></label>
+              <label>Largura máxima <input data-property="max-width" placeholder="none"></label>
+              <label>Altura mínima <input data-property="min-height" placeholder="auto"></label>
+            </div>
+            <label class="inline-check"><input id="lockAspect" type="checkbox"> Manter proporção ao redimensionar</label>
+            <p class="hint">Use valores como 420px, 60%, auto ou none.</p>
+          </section>
+
+          <section class="control-section">
+            <h2>Espaçamento</h2>
+            <div class="field-grid">
+              <label>Padding vertical <input data-property="padding-block" placeholder="0px"></label>
+              <label>Padding lateral <input data-property="padding-inline" placeholder="0px"></label>
+              <label>Margem vertical <input data-property="margin-block" placeholder="0px"></label>
+              <label>Margem lateral <input data-property="margin-inline" placeholder="0px"></label>
+              <label>Espaço interno <input data-property="gap" placeholder="normal"></label>
+              <label>Arredondamento <input data-property="border-radius" placeholder="0px"></label>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Texto</h2>
+            <div class="field-grid">
+              <label>Tamanho da fonte <input data-property="font-size" placeholder="16px"></label>
+              <label>Altura da linha <input data-property="line-height" placeholder="normal"></label>
+              <label>Espaço entre letras <input data-property="letter-spacing" placeholder="normal"></label>
+              <label>Alinhamento
+                <select data-property="text-align">
+                  <option value="">Original</option>
+                  <option value="left">Esquerda</option>
+                  <option value="center">Centro</option>
+                  <option value="right">Direita</option>
+                  <option value="justify">Justificado</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="control-section">
+            <h2>Posição e layout</h2>
+            <div class="field-grid">
+              <label>Deslocamento X <input data-property="--dev-x" placeholder="0px"></label>
+              <label>Deslocamento Y <input data-property="--dev-y" placeholder="0px"></label>
+              <label>Rotação <input data-property="rotate" placeholder="0deg"></label>
+              <label>Opacidade <input data-property="opacity" placeholder="1"></label>
+              <label>Ordem da camada <input data-property="z-index" placeholder="auto"></label>
+              <label>Posicionamento
+                <select data-property="position">
+                  <option value="">Original</option>
+                  <option value="relative">Relativo</option>
+                  <option value="absolute">Absoluto</option>
+                  <option value="fixed">Fixo</option>
+                </select>
+              </label>
+              <label>Colunas do grid <input data-property="grid-template-columns" placeholder="original"></label>
+              <label>Encaixe da imagem
+                <select data-property="object-fit">
+                  <option value="">Original</option>
+                  <option value="cover">Preencher</option>
+                  <option value="contain">Conter</option>
+                  <option value="fill">Esticar</option>
+                </select>
+              </label>
+              <label>Foco da imagem <input data-property="object-position" placeholder="50% 50%"></label>
+            </div>
+            <p class="hint">Arraste a etiqueta laranja sobre o objeto para movê-lo. Use as setas do teclado para ajustes de 1 px e Shift + seta para 10 px.</p>
+            <div class="button-grid" style="margin-top: 10px">
+              <button class="tool-button" id="bringForwardButton" type="button">Trazer à frente</button>
+              <button class="tool-button" id="sendBackwardButton" type="button">Enviar para trás</button>
+              <button class="tool-button" id="editTextButton" type="button">Editar texto</button>
+              <button class="tool-button" id="toggleVisibilityButton" type="button">Ocultar elemento</button>
+            </div>
+          </section>
+
+          <div class="inspector-actions">
+            <button class="tool-button" id="copyCssButton" type="button">Copiar CSS deste elemento</button>
+            <button class="tool-button danger" id="resetElementButton" type="button">Restaurar este elemento</button>
+            <button class="tool-button danger" id="resetAllButton" type="button">Restaurar todas as alterações</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <input id="fallbackFile" type="file" accept=".html,text/html" hidden>
+  <input id="replacementImage" type="file" accept="image/*" hidden>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'bethania-visual-editor-v1';
+      const STYLE_ID = 'visual-editor-overrides';
+      const EXPORT_START = '/* VISUAL EDITOR: INÍCIO */';
+      const EXPORT_END = '/* VISUAL EDITOR: FIM */';
+      const frame = document.getElementById('pageFrame');
+      const browserFrame = document.getElementById('browserFrame');
+      const controls = document.getElementById('controls');
+      const emptyState = document.getElementById('emptyState');
+      const selectionName = document.getElementById('selectionName');
+      const selectionSelector = document.getElementById('selectionSelector');
+      const breakpointSelect = document.getElementById('breakpoint');
+      const undoButton = document.getElementById('undoButton');
+      const fallbackFile = document.getElementById('fallbackFile');
+      const replacementImage = document.getElementById('replacementImage');
+      const imageControls = document.getElementById('imageControls');
+      const imageSource = document.getElementById('imageSource');
+      const imageAlt = document.getElementById('imageAlt');
+      const lockAspect = document.getElementById('lockAspect');
+
+      let changes = loadChanges();
+      let contentChanges = loadContentChanges();
+      let history = [];
+      let selectedElement = null;
+      let selectedSelector = '';
+      let overlay = null;
+      let hoverBox = null;
+      let resizeState = null;
+      let moveState = null;
+      let toastTimer = null;
+      let fallbackMode = 'download';
+
+      function loadChanges() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { base: {}, tablet: {}, mobile: {} };
+        } catch (_) {
+          return { base: {}, tablet: {}, mobile: {} };
+        }
+      }
+
+      function normalizeChanges(value) {
+        return {
+          base: value.base || {},
+          tablet: value.tablet || {},
+          mobile: value.mobile || {}
+        };
+      }
+
+      function loadContentChanges() {
+        try {
+          return JSON.parse(localStorage.getItem(STORAGE_KEY + '-content')) || { images: {}, text: {} };
+        } catch (_) {
+          return { images: {}, text: {} };
+        }
+      }
+
+      function normalizeContentChanges(value) {
+        return { images: value?.images || {}, text: value?.text || {} };
+      }
+
+      function persist() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(changes));
+          localStorage.setItem(STORAGE_KEY + '-content', JSON.stringify(contentChanges));
+        } catch (_) {
+          showToast('A imagem é grande demais para ser salva no navegador, mas continuará disponível nesta sessão.');
+        }
+        injectStyles();
+        applyContentChanges();
+      }
+
+      function snapshot() {
+        history.push(JSON.stringify({ changes, contentChanges }));
+        if (history.length > 60) history.shift();
+        undoButton.disabled = history.length === 0;
+      }
+
+      function undo() {
+        if (!history.length) return;
+        const previousContent = JSON.stringify(contentChanges);
+        const previous = JSON.parse(history.pop());
+        changes = normalizeChanges(previous.changes || previous);
+        contentChanges = normalizeContentChanges(previous.contentChanges);
+        undoButton.disabled = history.length === 0;
+        persist();
+        if (previousContent !== JSON.stringify(contentChanges)) {
+          frame.contentWindow.location.reload();
+          showToast('Última alteração desfeita.');
+          return;
+        }
+        refreshInspector();
+        updateOverlay();
+        showToast('Última alteração desfeita.');
+      }
+
+      function cssEscape(value) {
+        if (window.CSS && CSS.escape) return CSS.escape(value);
+        return value.replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+      }
+
+      function selectorFor(element) {
+        if (element.id) return '#' + cssEscape(element.id);
+        const parts = [];
+        let current = element;
+        const doc = frame.contentDocument;
+
+        while (current && current !== doc.body && parts.length < 6) {
+          let part = current.tagName.toLowerCase();
+          const usefulClasses = [...current.classList].filter((name) => name !== 'reveal' && name !== 'is-visible' && !name.startsWith('dev-'));
+          if (usefulClasses.length) part += usefulClasses.map((name) => '.' + cssEscape(name)).join('');
+
+          const parent = current.parentElement;
+          if (parent) {
+            const peers = [...parent.children].filter((item) => item.tagName === current.tagName);
+            if (peers.length > 1) part += ':nth-of-type(' + (peers.indexOf(current) + 1) + ')';
+          }
+
+          parts.unshift(part);
+          if (usefulClasses.length && doc.querySelectorAll(parts.join(' > ')).length === 1) break;
+          current = parent;
+        }
+        return parts.join(' > ');
+      }
+
+      function declarationsToCss(declarations) {
+        return Object.entries(declarations)
+          .filter(([, value]) => value !== '')
+          .map(([property, value]) => '  ' + property + ': ' + value + ' !important;')
+          .join('\n');
+      }
+
+      function buildCss() {
+        const groups = [];
+        const baseRules = Object.entries(changes.base).map(([selector, declarations]) => {
+          const body = declarationsToCss(declarations);
+          return body ? selector + ' {\n' + body + '\n}' : '';
+        }).filter(Boolean);
+        if (baseRules.length) groups.push(baseRules.join('\n\n'));
+
+        [['tablet', '900px'], ['mobile', '600px']].forEach(([key, width]) => {
+          const rules = Object.entries(changes[key]).map(([selector, declarations]) => {
+            const body = declarationsToCss(declarations);
+            return body ? '  ' + selector + ' {\n' + body.split('\n').map((line) => '  ' + line).join('\n') + '\n  }' : '';
+          }).filter(Boolean);
+          if (rules.length) groups.push('@media (max-width: ' + width + ') {\n' + rules.join('\n\n') + '\n}');
+        });
+
+        const hasTranslate = Object.values(changes).some((group) => Object.values(group).some((item) => '--dev-x' in item || '--dev-y' in item));
+        if (hasTranslate) {
+          groups.unshift('[style], body { --dev-x: 0px; --dev-y: 0px; }\n' + Object.values(changes).flatMap((group) => Object.keys(group)).filter((value, index, all) => all.indexOf(value) === index).join(',\n') + ' { translate: var(--dev-x, 0px) var(--dev-y, 0px); }');
+        }
+        return groups.join('\n\n');
+      }
+
+      function injectStyles() {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        let style = doc.getElementById(STYLE_ID);
+        if (!style) {
+          style = doc.createElement('style');
+          style.id = STYLE_ID;
+          doc.head.appendChild(style);
+        }
+        style.textContent = buildCss();
+      }
+
+      function imageElementFor(element) {
+        if (!element) return null;
+        if (element.tagName === 'IMG') return element;
+        return element.querySelector?.('img') || null;
+      }
+
+      function applyContentChanges() {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        Object.entries(contentChanges.images).forEach(([selector, data]) => {
+          try {
+            const image = imageElementFor(doc.querySelector(selector));
+            if (!image) return;
+            if (data.src) image.src = data.src;
+            if (data.alt !== undefined) image.alt = data.alt;
+          } catch (_) {}
+        });
+        Object.entries(contentChanges.text).forEach(([selector, html]) => {
+          try {
+            const element = doc.querySelector(selector);
+            if (element && !element.isContentEditable) element.innerHTML = html;
+          } catch (_) {}
+        });
+      }
+
+      function setupFrame() {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        selectedElement = null;
+        selectedSelector = '';
+        controls.hidden = true;
+        emptyState.hidden = false;
+        selectionName.textContent = 'Nenhum';
+        selectionSelector.textContent = 'Clique em algo na página';
+
+        const helperStyle = doc.createElement('style');
+        helperStyle.id = 'dev-editor-ui';
+        helperStyle.textContent = `
+          .reveal { opacity: 1 !important; transform: none !important; }
+          .dev-editor-overlay, .dev-editor-hover { position: fixed; pointer-events: none; z-index: 2147483646; }
+          .dev-editor-overlay { border: 2px solid #c56d42; box-shadow: inset 0 0 0 1px rgba(255,255,255,.45); }
+          .dev-editor-hover { border: 1px dashed rgba(197,109,66,.8); }
+          .dev-editor-label { position: absolute; left: -2px; bottom: 100%; max-width: 260px; padding: 4px 7px; color: #fff; background: #b45e35; font: 11px/1.2 Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .dev-resize-handle { position: absolute; width: 11px; height: 11px; background: #fff; border: 2px solid #b45e35; border-radius: 2px; pointer-events: auto; }
+          .dev-editor-label { pointer-events: auto; cursor: move; user-select: none; }
+          .dev-resize-handle[data-direction="n"] { left: calc(50% - 5px); top: -7px; cursor: ns-resize; }
+          .dev-resize-handle[data-direction="e"] { right: -7px; top: calc(50% - 5px); cursor: ew-resize; }
+          .dev-resize-handle[data-direction="s"] { left: calc(50% - 5px); bottom: -7px; cursor: ns-resize; }
+          .dev-resize-handle[data-direction="w"] { left: -7px; top: calc(50% - 5px); cursor: ew-resize; }
+          .dev-resize-handle[data-direction="ne"] { right: -7px; top: -7px; cursor: nesw-resize; }
+          .dev-resize-handle[data-direction="nw"] { left: -7px; top: -7px; cursor: nwse-resize; }
+          .dev-resize-handle[data-direction="se"] { right: -7px; bottom: -7px; cursor: nwse-resize; }
+          .dev-resize-handle[data-direction="sw"] { left: -7px; bottom: -7px; cursor: nesw-resize; }
+          [contenteditable="true"] { outline: 2px dashed #c56d42 !important; outline-offset: 3px; cursor: text !important; }
+        `;
+        doc.head.appendChild(helperStyle);
+        injectStyles();
+        applyContentChanges();
+
+        overlay = doc.createElement('div');
+        overlay.className = 'dev-editor-overlay';
+        overlay.hidden = true;
+        const label = doc.createElement('span');
+        label.className = 'dev-editor-label';
+        label.addEventListener('pointerdown', startMove);
+        overlay.appendChild(label);
+        ['n', 'e', 's', 'w', 'ne', 'nw', 'se', 'sw'].forEach((direction) => {
+          const handle = doc.createElement('span');
+          handle.className = 'dev-resize-handle';
+          handle.dataset.direction = direction;
+          handle.addEventListener('pointerdown', startResize);
+          overlay.appendChild(handle);
+        });
+        doc.body.appendChild(overlay);
+
+        hoverBox = doc.createElement('div');
+        hoverBox.className = 'dev-editor-hover';
+        hoverBox.hidden = true;
+        doc.body.appendChild(hoverBox);
+
+        doc.addEventListener('click', selectFromEvent, true);
+        doc.addEventListener('dblclick', editTextFromEvent, true);
+        doc.addEventListener('keydown', moveWithKeyboard, true);
+        doc.addEventListener('mousemove', hoverFromEvent, true);
+        doc.addEventListener('mouseleave', () => { if (hoverBox) hoverBox.hidden = true; });
+        doc.addEventListener('scroll', updateOverlay, true);
+        window.addEventListener('resize', updateOverlay);
+      }
+
+      function isEditorUi(element) {
+        return element.closest && (element.closest('.dev-editor-overlay') || element.closest('.dev-editor-hover'));
+      }
+
+      function selectFromEvent(event) {
+        if (isEditorUi(event.target)) return;
+        if (event.target.isContentEditable) return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectElement(editableTarget(event.target, event.altKey));
+      }
+
+      function hoverFromEvent(event) {
+        const target = editableTarget(event.target, event.altKey);
+        if (!hoverBox || isEditorUi(event.target) || target === selectedElement) {
+          if (hoverBox) hoverBox.hidden = true;
+          return;
+        }
+        const rect = target.getBoundingClientRect();
+        Object.assign(hoverBox.style, { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' });
+        hoverBox.hidden = false;
+      }
+
+      function editableTarget(target, selectInnerImage = false) {
+        if (!target || target.tagName !== 'IMG' || selectInnerImage) return target;
+        return target.closest('figure') || target.parentElement || target;
+      }
+
+      function editTextFromEvent(event) {
+        if (isEditorUi(event.target)) return;
+        const target = editableTarget(event.target, true);
+        if (!isTextElement(target)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectElement(target);
+        beginTextEdit();
+      }
+
+      function isTextElement(element) {
+        if (!element || imageElementFor(element) || element.children.length > 4) return false;
+        return Boolean(element.textContent.trim());
+      }
+
+      function selectElement(element) {
+        selectedElement = element;
+        selectedSelector = selectorFor(element);
+        controls.hidden = false;
+        emptyState.hidden = true;
+        selectionName.textContent = element.tagName.toLowerCase() + describeElement(element);
+        selectionSelector.textContent = selectedSelector;
+        const image = imageElementFor(element);
+        imageControls.hidden = !image;
+        if (image) {
+          const saved = contentChanges.images[selectedSelector];
+          imageSource.value = saved?.displaySource || image.getAttribute('src') || '';
+          imageAlt.value = saved?.alt ?? image.alt ?? '';
+        }
+        document.getElementById('editTextButton').disabled = !isTextElement(element);
+        const hidden = changes[breakpointSelect.value]?.[selectedSelector]?.visibility === 'hidden';
+        document.getElementById('toggleVisibilityButton').textContent = hidden ? 'Mostrar elemento' : 'Ocultar elemento';
+        refreshInspector();
+        updateOverlay();
+      }
+
+      function describeElement(element) {
+        if (element.id) return '#' + element.id;
+        const classes = [...element.classList].filter((name) => name !== 'reveal' && name !== 'is-visible');
+        const classDescription = classes.length ? '.' + classes.join('.') : '';
+        return element.tagName === 'FIGURE' ? classDescription + ' — moldura da imagem' : classDescription;
+      }
+
+      function updateOverlay() {
+        if (!overlay || !selectedElement || !selectedElement.isConnected) {
+          if (overlay) overlay.hidden = true;
+          return;
+        }
+        const rect = selectedElement.getBoundingClientRect();
+        Object.assign(overlay.style, { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' });
+        overlay.querySelector('.dev-editor-label').textContent = selectedSelector + '  ' + Math.round(rect.width) + ' × ' + Math.round(rect.height);
+        overlay.hidden = false;
+      }
+
+      function effectiveValue(property) {
+        const breakpoint = breakpointSelect.value;
+        const targetSelector = targetSelectorForProperty(property);
+        const explicit = changes[breakpoint]?.[targetSelector]?.[property];
+        if (explicit !== undefined) return explicit;
+        if (!selectedElement) return '';
+        const targetElement = targetElementForProperty(property);
+        const computed = frame.contentWindow.getComputedStyle(targetElement);
+        if (property === '--dev-x' || property === '--dev-y') return '0px';
+        if (property === 'padding-block') return computed.paddingTop === computed.paddingBottom ? computed.paddingTop : computed.paddingTop + ' ' + computed.paddingBottom;
+        if (property === 'padding-inline') return computed.paddingLeft === computed.paddingRight ? computed.paddingLeft : computed.paddingLeft + ' ' + computed.paddingRight;
+        if (property === 'margin-block') return computed.marginTop === computed.marginBottom ? computed.marginTop : computed.marginTop + ' ' + computed.marginBottom;
+        if (property === 'margin-inline') return computed.marginLeft === computed.marginRight ? computed.marginLeft : computed.marginLeft + ' ' + computed.marginRight;
+        return computed.getPropertyValue(property).trim();
+      }
+
+      function refreshInspector() {
+        if (!selectedElement) return;
+        document.querySelectorAll('[data-property]').forEach((field) => {
+          field.value = effectiveValue(field.dataset.property);
+        });
+      }
+
+      function setProperty(property, value, recordHistory = true) {
+        if (!selectedSelector) return;
+        const breakpoint = breakpointSelect.value;
+        const targetSelector = targetSelectorForProperty(property);
+        if (recordHistory) snapshot();
+        changes[breakpoint][targetSelector] ||= {};
+        if (value.trim()) changes[breakpoint][targetSelector][property] = value.trim();
+        else delete changes[breakpoint][targetSelector][property];
+        if (!Object.keys(changes[breakpoint][targetSelector]).length) delete changes[breakpoint][targetSelector];
+        persist();
+        requestAnimationFrame(updateOverlay);
+      }
+
+      function targetSelectorForProperty(property) {
+        if (['object-fit', 'object-position'].includes(property) && selectedElement?.tagName !== 'IMG' && currentImage()) return selectedSelector + ' img';
+        return selectedSelector;
+      }
+
+      function targetElementForProperty(property) {
+        if (['object-fit', 'object-position'].includes(property) && selectedElement?.tagName !== 'IMG' && currentImage()) return currentImage();
+        return selectedElement;
+      }
+
+      function numericOffset(property) {
+        const value = changes[breakpointSelect.value]?.[selectedSelector]?.[property];
+        return Number.parseFloat(value) || 0;
+      }
+
+      function startMove(event) {
+        if (!selectedElement) return;
+        event.preventDefault();
+        event.stopPropagation();
+        moveState = {
+          startX: event.clientX,
+          startY: event.clientY,
+          x: numericOffset('--dev-x'),
+          y: numericOffset('--dev-y')
+        };
+        snapshot();
+        frame.contentDocument.addEventListener('pointermove', movePointer, true);
+        frame.contentDocument.addEventListener('pointerup', endMove, true);
+      }
+
+      function movePointer(event) {
+        if (!moveState) return;
+        const group = changes[breakpointSelect.value];
+        group[selectedSelector] ||= {};
+        group[selectedSelector]['--dev-x'] = Math.round(moveState.x + event.clientX - moveState.startX) + 'px';
+        group[selectedSelector]['--dev-y'] = Math.round(moveState.y + event.clientY - moveState.startY) + 'px';
+        persist();
+        refreshInspector();
+        requestAnimationFrame(updateOverlay);
+      }
+
+      function endMove() {
+        moveState = null;
+        frame.contentDocument.removeEventListener('pointermove', movePointer, true);
+        frame.contentDocument.removeEventListener('pointerup', endMove, true);
+      }
+
+      function moveWithKeyboard(event) {
+        if (!selectedElement || event.target.isContentEditable || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        const step = event.shiftKey ? 10 : 1;
+        const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
+        const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
+        snapshot();
+        const group = changes[breakpointSelect.value];
+        group[selectedSelector] ||= {};
+        group[selectedSelector]['--dev-x'] = numericOffset('--dev-x') + dx + 'px';
+        group[selectedSelector]['--dev-y'] = numericOffset('--dev-y') + dy + 'px';
+        persist();
+        refreshInspector();
+        requestAnimationFrame(updateOverlay);
+      }
+
+      function startResize(event) {
+        if (!selectedElement) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = selectedElement.getBoundingClientRect();
+        resizeState = {
+          direction: event.currentTarget.dataset.direction,
+          startX: event.clientX,
+          startY: event.clientY,
+          width: rect.width,
+          height: rect.height,
+          x: numericOffset('--dev-x'),
+          y: numericOffset('--dev-y'),
+          ratio: rect.width / Math.max(rect.height, 1)
+        };
+        snapshot();
+        frame.contentDocument.addEventListener('pointermove', resizeMove, true);
+        frame.contentDocument.addEventListener('pointerup', endResize, true);
+      }
+
+      function resizeMove(event) {
+        if (!resizeState) return;
+        const dx = event.clientX - resizeState.startX;
+        const dy = event.clientY - resizeState.startY;
+        const breakpoint = breakpointSelect.value;
+        changes[breakpoint][selectedSelector] ||= {};
+        const direction = resizeState.direction;
+        const horizontal = direction.includes('e') || direction.includes('w');
+        const vertical = direction.includes('n') || direction.includes('s');
+        let width = resizeState.width + (direction.includes('e') ? dx : direction.includes('w') ? -dx : 0);
+        let height = resizeState.height + (direction.includes('s') ? dy : direction.includes('n') ? -dy : 0);
+
+        if (lockAspect.checked) {
+          if (horizontal && vertical) {
+            if (Math.abs(dx) >= Math.abs(dy)) height = width / resizeState.ratio;
+            else width = height * resizeState.ratio;
+          } else if (horizontal) {
+            height = width / resizeState.ratio;
+          } else if (vertical) {
+            width = height * resizeState.ratio;
+          }
+        }
+
+        width = Math.max(12, width);
+        height = Math.max(12, height);
+        if (horizontal || (lockAspect.checked && vertical)) {
+          changes[breakpoint][selectedSelector].width = Math.round(width) + 'px';
+          changes[breakpoint][selectedSelector]['max-width'] = 'none';
+        }
+        if (vertical || (lockAspect.checked && horizontal)) changes[breakpoint][selectedSelector].height = Math.round(height) + 'px';
+        if (direction.includes('w')) changes[breakpoint][selectedSelector]['--dev-x'] = Math.round(resizeState.x + resizeState.width - width) + 'px';
+        if (direction.includes('n')) changes[breakpoint][selectedSelector]['--dev-y'] = Math.round(resizeState.y + resizeState.height - height) + 'px';
+        persist();
+        refreshInspector();
+        requestAnimationFrame(updateOverlay);
+      }
+
+      function endResize() {
+        resizeState = null;
+        frame.contentDocument.removeEventListener('pointermove', resizeMove, true);
+        frame.contentDocument.removeEventListener('pointerup', endResize, true);
+      }
+
+      function beginTextEdit() {
+        if (!isTextElement(selectedElement)) return showToast('Selecione diretamente um bloco de texto.');
+        const editingElement = selectedElement;
+        const editingSelector = selectedSelector;
+        overlay.hidden = true;
+        editingElement.contentEditable = 'true';
+        editingElement.focus();
+        const range = frame.contentDocument.createRange();
+        range.selectNodeContents(editingElement);
+        const selection = frame.contentWindow.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const finish = () => {
+          snapshot();
+          contentChanges.text[editingSelector] = editingElement.innerHTML;
+          editingElement.contentEditable = 'false';
+          editingElement.removeEventListener('blur', finish);
+          persist();
+          updateOverlay();
+          showToast('Texto atualizado.');
+        };
+        selectedElement.addEventListener('blur', finish);
+      }
+
+      function currentImage() {
+        return imageElementFor(selectedElement);
+      }
+
+      function storeImageChange(src, displaySource) {
+        const image = currentImage();
+        if (!image) return;
+        snapshot();
+        contentChanges.images[selectedSelector] = { src, displaySource, alt: imageAlt.value };
+        image.src = src;
+        image.alt = imageAlt.value;
+        imageSource.value = displaySource;
+        persist();
+        updateOverlay();
+        showToast('Imagem substituída na composição.');
+      }
+
+      function replaceImageFromFile() {
+        replacementImage.click();
+      }
+
+      function restoreImage() {
+        if (!contentChanges.images[selectedSelector]) return;
+        snapshot();
+        delete contentChanges.images[selectedSelector];
+        persist();
+        frame.contentWindow.location.reload();
+        showToast('Imagem original restaurada.');
+      }
+
+      function updateImageMetadata() {
+        const image = currentImage();
+        if (!image) return;
+        const source = imageSource.value.trim();
+        const existing = contentChanges.images[selectedSelector];
+        snapshot();
+        contentChanges.images[selectedSelector] = {
+          src: existing && source === existing.displaySource ? existing.src : source || existing?.src || image.getAttribute('src'),
+          displaySource: source || existing?.displaySource || image.getAttribute('src'),
+          alt: imageAlt.value
+        };
+        persist();
+        updateOverlay();
+      }
+
+      function changeLayer(delta) {
+        if (!selectedElement) return;
+        const current = Number.parseInt(frame.contentWindow.getComputedStyle(selectedElement).zIndex, 10);
+        const computedPosition = frame.contentWindow.getComputedStyle(selectedElement).position;
+        snapshot();
+        const group = changes[breakpointSelect.value];
+        group[selectedSelector] ||= {};
+        group[selectedSelector].position = computedPosition === 'static' ? 'relative' : computedPosition;
+        group[selectedSelector]['z-index'] = String((Number.isFinite(current) ? current : 0) + delta);
+        persist();
+        refreshInspector();
+      }
+
+      function toggleVisibility() {
+        const hidden = changes[breakpointSelect.value]?.[selectedSelector]?.visibility === 'hidden';
+        setProperty('visibility', hidden ? 'visible' : 'hidden');
+        document.getElementById('toggleVisibilityButton').textContent = hidden ? 'Ocultar elemento' : 'Mostrar elemento';
+        refreshInspector();
+      }
+
+      function selectParent() {
+        const parent = selectedElement?.parentElement;
+        if (parent && parent !== frame.contentDocument.body) selectElement(parent);
+      }
+
+      function selectChild() {
+        if (selectedElement?.firstElementChild && !isEditorUi(selectedElement.firstElementChild)) selectElement(selectedElement.firstElementChild);
+      }
+
+      function resetElement() {
+        if (!selectedSelector) return;
+        const hadContent = Boolean(contentChanges.images[selectedSelector] || contentChanges.text[selectedSelector]);
+        snapshot();
+        Object.keys(changes).forEach((key) => {
+          delete changes[key][selectedSelector];
+          delete changes[key][selectedSelector + ' img'];
+        });
+        delete contentChanges.images[selectedSelector];
+        delete contentChanges.text[selectedSelector];
+        persist();
+        if (hadContent) frame.contentWindow.location.reload();
+        refreshInspector();
+        updateOverlay();
+        showToast('Elemento restaurado em todos os tamanhos.');
+      }
+
+      function resetAll() {
+        if (!confirm('Restaurar todas as alterações feitas no editor?')) return;
+        snapshot();
+        changes = { base: {}, tablet: {}, mobile: {} };
+        contentChanges = { images: {}, text: {} };
+        persist();
+        frame.contentWindow.location.reload();
+        refreshInspector();
+        updateOverlay();
+        showToast('Todas as alterações foram restauradas.');
+      }
+
+      function cssForSelected() {
+        const scoped = { base: {}, tablet: {}, mobile: {} };
+        Object.keys(scoped).forEach((key) => {
+          if (changes[key][selectedSelector]) scoped[key][selectedSelector] = changes[key][selectedSelector];
+          if (changes[key][selectedSelector + ' img']) scoped[key][selectedSelector + ' img'] = changes[key][selectedSelector + ' img'];
+        });
+        const previous = changes;
+        changes = scoped;
+        const css = buildCss();
+        changes = previous;
+        return css;
+      }
+
+      async function copySelectedCss() {
+        const css = cssForSelected();
+        if (!css) return showToast('Este elemento ainda não tem alterações.');
+        try {
+          await navigator.clipboard.writeText(css);
+          showToast('CSS do elemento copiado.');
+        } catch (_) {
+          showToast('Não foi possível acessar a área de transferência.');
+        }
+      }
+
+      function updateHtml(source) {
+        const blockPattern = /\s*<style id=["']visual-editor-export["']>[\s\S]*?<\/style>\s*/i;
+        let cleanSource = source.replace(blockPattern, '\n');
+        const hasContentChanges = Object.keys(contentChanges.images).length || Object.keys(contentChanges.text).length;
+        if (hasContentChanges) {
+          const parsed = new DOMParser().parseFromString(cleanSource, 'text/html');
+          Object.entries(contentChanges.images).forEach(([selector, data]) => {
+            try {
+              const element = parsed.querySelector(selector);
+              const image = element?.tagName === 'IMG' ? element : element?.querySelector('img');
+              if (!image) return;
+              if (data.src) image.setAttribute('src', data.src);
+              if (data.alt !== undefined) image.setAttribute('alt', data.alt);
+            } catch (_) {}
+          });
+          Object.entries(contentChanges.text).forEach(([selector, html]) => {
+            try {
+              const element = parsed.querySelector(selector);
+              if (element) element.innerHTML = html;
+            } catch (_) {}
+          });
+          cleanSource = '<!DOCTYPE html>\n' + parsed.documentElement.outerHTML;
+        }
+        const css = buildCss();
+        if (!css) return cleanSource;
+        const block = '\n  <style id="visual-editor-export">\n    ' + EXPORT_START + '\n' + css.split('\n').map((line) => '    ' + line).join('\n') + '\n    ' + EXPORT_END + '\n  </style>\n';
+        const bridgeTag = /<(?:style|link)\b[^>]*id=["']responsive-bridges["'][^>]*>/i;
+        if (bridgeTag.test(cleanSource)) {
+          return cleanSource.replace(bridgeTag, (tag) => block + '  ' + tag);
+        }
+        return cleanSource.replace(/<\/head>/i, block + '</head>');
+      }
+
+      function downloadHtml(source, filename = 'index.html') {
+        const blob = new Blob([updateHtml(source)], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('HTML atualizado baixado.');
+      }
+
+      async function applyToIndex() {
+        if ('showOpenFilePicker' in window) {
+          try {
+            const [handle] = await window.showOpenFilePicker({
+              multiple: false,
+              types: [{ description: 'Arquivo HTML', accept: { 'text/html': ['.html'] } }]
+            });
+            const file = await handle.getFile();
+            if (file.name.toLowerCase() !== 'index.html' && !confirm('O arquivo escolhido é "' + file.name + '". Deseja atualizá-lo mesmo assim?')) return;
+            const writable = await handle.createWritable();
+            await writable.write(updateHtml(await file.text()));
+            await writable.close();
+            showToast('Alterações aplicadas no arquivo ' + file.name + '.');
+          } catch (error) {
+            if (error.name !== 'AbortError') showToast('Não foi possível gravar o arquivo. Use “Baixar HTML”.');
+          }
+          return;
+        }
+        fallbackMode = 'apply';
+        fallbackFile.click();
+      }
+
+      async function chooseForDownload() {
+        try {
+          const response = await fetch('index.html', { cache: 'no-store' });
+          if (!response.ok) throw new Error('Arquivo não encontrado');
+          downloadHtml(await response.text());
+        } catch (_) {
+          fallbackMode = 'download';
+          fallbackFile.click();
+        }
+      }
+
+      fallbackFile.addEventListener('change', async () => {
+        const file = fallbackFile.files[0];
+        if (!file) return;
+        downloadHtml(await file.text(), file.name);
+        if (fallbackMode === 'apply') showToast('Seu navegador não grava arquivos diretamente. Substitua o index.html pelo arquivo baixado.');
+        fallbackFile.value = '';
+      });
+
+      replacementImage.addEventListener('change', () => {
+        const file = replacementImage.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.addEventListener('load', () => storeImageChange(reader.result, file.name));
+        reader.addEventListener('error', () => showToast('Não foi possível ler essa imagem.'));
+        reader.readAsDataURL(file);
+        replacementImage.value = '';
+      });
+
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('is-visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 3200);
+      }
+
+      document.querySelectorAll('[data-property]').forEach((field) => {
+        field.addEventListener('change', () => setProperty(field.dataset.property, field.value));
+        if (field.tagName === 'INPUT') {
+          field.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') field.blur();
+          });
+        }
+      });
+
+      document.querySelectorAll('[data-viewport]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const width = Number(button.dataset.viewport);
+          browserFrame.style.width = width + 'px';
+          document.querySelectorAll('[data-viewport]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+          if (width <= 600) breakpointSelect.value = 'mobile';
+          else if (width <= 900) breakpointSelect.value = 'tablet';
+          else breakpointSelect.value = 'base';
+          refreshInspector();
+          setTimeout(updateOverlay, 380);
+        });
+      });
+
+      breakpointSelect.addEventListener('change', refreshInspector);
+      imageSource.addEventListener('change', updateImageMetadata);
+      imageAlt.addEventListener('change', updateImageMetadata);
+      undoButton.addEventListener('click', undo);
+      document.getElementById('reloadButton').addEventListener('click', () => frame.contentWindow.location.reload());
+      document.getElementById('copyCssButton').addEventListener('click', copySelectedCss);
+      document.getElementById('resetElementButton').addEventListener('click', resetElement);
+      document.getElementById('resetAllButton').addEventListener('click', resetAll);
+      document.getElementById('replaceImageButton').addEventListener('click', replaceImageFromFile);
+      document.getElementById('restoreImageButton').addEventListener('click', restoreImage);
+      document.getElementById('selectParentButton').addEventListener('click', selectParent);
+      document.getElementById('selectChildButton').addEventListener('click', selectChild);
+      document.getElementById('bringForwardButton').addEventListener('click', () => changeLayer(1));
+      document.getElementById('sendBackwardButton').addEventListener('click', () => changeLayer(-1));
+      document.getElementById('editTextButton').addEventListener('click', beginTextEdit);
+      document.getElementById('toggleVisibilityButton').addEventListener('click', toggleVisibility);
+      document.getElementById('applyButton').addEventListener('click', applyToIndex);
+      document.getElementById('downloadButton').addEventListener('click', chooseForDownload);
+      frame.addEventListener('load', setupFrame);
+    })();
+  </script>
+</body>
+</html>

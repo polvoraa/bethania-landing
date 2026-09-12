@@ -1,0 +1,121 @@
+/*
+ * Pontes responsivas para os ajustes feitos no editor visual.
+ * Os layouts de referência em 390 px, 768 px e 1440 px permanecem intactos.
+ */
+
+.hero,
+.intro,
+.paths,
+.about,
+.footer {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* Transição fluida: celular (390 px) -> tablet (768 px). */
+@media (min-width: 391px) and (max-width: 767px) {
+  section.hero:nth-of-type(1) > div.container {
+    width: calc(196.2963vw - 389.556px) !important;
+    --dev-x: calc(10.582vw - 43.27px) !important;
+  }
+
+  div.hero__heading {
+    width: calc(46.5608vw - 12.587px) !important;
+    --dev-x: calc(10.582vw + 73.73px) !important;
+  }
+
+  #page-title {
+    font-size: calc(6.7725vw + 13.593px) !important;
+  }
+
+  a.address > span:nth-of-type(1) {
+    --dev-x: calc(21.6931vw - 166.603px) !important;
+  }
+
+  figure.hero__image {
+    width: calc(91.5344vw - 1.985px) !important;
+    height: calc(93.1217vw - 213.775px) !important;
+  }
+
+  figure.hero__image > img {
+    width: calc(249.7354vw - 573.968px) !important;
+    height: calc(602.159px - 1.32275vw) !important;
+    --dev-x: calc(515.873px - 132.2751vw) !important;
+    --dev-y: calc(47.619vw - 365.714px) !important;
+  }
+
+  div.container.about__grid {
+    height: calc(94.4444vw + 579.667px) !important;
+  }
+
+  div.container.footer__inner > a.button {
+    --dev-x: calc(35.7143vw - 109.286px) !important;
+    --dev-y: calc(131.27px - 10.582vw) !important;
+  }
+}
+
+/* Transição fluida: tablet (768 px) -> desktop (1440 px). */
+@media (min-width: 769px) and (max-width: 1439px) {
+  section.hero:nth-of-type(1) > div.container {
+    width: calc(1120.286px - .297619vw) !important;
+    --dev-x: calc(.297619vw - 4.286px) !important;
+  }
+
+  div.hero__heading {
+    width: calc(114.7321vw - 536.143px) !important;
+    --dev-x: calc(332.143px - 23.0655vw) !important;
+  }
+
+  #page-title {
+    font-size: calc(5.66667vw + 22.08px) !important;
+  }
+
+  figure.hero__image {
+    width: calc(95.5357vw - 33px) !important;
+    height: calc(523.714px - 2.82738vw) !important;
+    --dev-y: calc(4.91071vw - 70.714px) !important;
+  }
+
+  figure.hero__image > img {
+    --dev-x: calc(74.4048vw - 1071.429px) !important;
+    --dev-y: calc(11.429px - 1.4881vw) !important;
+  }
+
+  div.container.about__grid {
+    height: calc(2047.857px - 96.7262vw) !important;
+  }
+}
+
+/* Evita a colisão entre o título e o endereço na faixa de notebooks estreitos. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  #page-title {
+    --dev-x: calc(6.6265vw - 132.89px) !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .hero__heading {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .address {
+    justify-self: start !important;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1439px) {
+  #page-title {
+    --dev-x: calc(11.1765px - 6.47059vw) !important;
+  }
+}
+
+@supports not (overflow: clip) {
+  .hero,
+  .intro,
+  .paths,
+  .about,
+  .footer {
+    overflow-x: hidden;
+  }
+}

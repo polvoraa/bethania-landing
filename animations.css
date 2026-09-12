@@ -1,0 +1,127 @@
+/* Camada visual das animações GSAP. Não altera as dimensões do layout. */
+
+html.motion-enhanced .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.motion-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  background: var(--brown);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.motion-loader__inner {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.motion-loader__name {
+  font-family: var(--serif);
+  font-size: clamp(3.4rem, 8vw, 7rem);
+  font-weight: 500;
+  line-height: .8;
+  letter-spacing: -.055em;
+}
+
+.motion-loader__line {
+  width: min(260px, 55vw);
+  height: 1px;
+  background: rgba(239, 232, 217, .45);
+  transform-origin: left center;
+}
+
+.motion-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: 2px;
+  background: var(--copper);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.motion-word-mask {
+  display: inline-block;
+  padding-block: .08em;
+  margin-block: -.08em;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.motion-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+.motion-rule {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 1px;
+  background: rgba(173, 78, 32, .35);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.paths > .container { position: relative; }
+
+.hero__image,
+.intro__portrait,
+.service__media,
+.about__photo {
+  isolation: isolate;
+}
+
+html.motion-enhanced .hero__image img,
+html.motion-enhanced .intro__portrait img,
+html.motion-enhanced .service__media img,
+html.motion-enhanced .about__photo img {
+  will-change: transform;
+}
+
+html.motion-enhanced .service {
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+html.motion-enhanced .service__media,
+html.motion-enhanced .service h3,
+html.motion-enhanced .service p {
+  transform: translateZ(1px);
+}
+
+.motion-footer-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+@media (max-width: 600px) {
+  .motion-loader__name { font-size: 4rem; }
+  .motion-progress { height: 1px; }
+  html.motion-enhanced .hero__image img,
+  html.motion-enhanced .intro__portrait img,
+  html.motion-enhanced .service__media img,
+  html.motion-enhanced .about__photo img {
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-loader,
+  .motion-progress,
+  .motion-rule { display: none !important; }
+
+  .motion-word-mask { overflow: visible; }
+  .motion-word { transform: none !important; opacity: 1 !important; }
+}

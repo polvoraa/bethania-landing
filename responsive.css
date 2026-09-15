@@ -121,3 +121,173 @@
     overflow-x: hidden;
   }
 }
+
+/*
+ * Consultorio
+ * Mantem a composicao criada no editor em telas largas e neutraliza as
+ * dimensoes/translate fixos que impediam a grade de se adaptar abaixo dela.
+ */
+div.container.consulting-room__frame {
+  width: min(calc(100% - clamp(28px, 5vw, 72px)), 1296px) !important;
+  max-width: 1296px !important;
+  margin-inline: auto;
+}
+
+/* Mantem o recorte da hero ancorado na lateral direita do frame. */
+figure.hero__image {
+  position: relative;
+}
+
+figure.hero__image > img {
+  position: absolute;
+  top: -10%;
+  right: 0;
+  bottom: auto;
+  left: auto;
+  width: calc(100% + clamp(12px, 1vw, 18px)) !important;
+  max-width: none !important;
+  height: 120% !important;
+  object-fit: cover !important;
+  object-position: right center !important;
+  translate: none !important;
+  --dev-x: 0px !important;
+  --dev-y: 0px !important;
+}
+
+@media (max-width: 1100px) {
+  div.container.consulting-room__frame {
+    padding: clamp(18px, 3vw, 30px);
+  }
+
+  .consulting-room__grid {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    grid-template-rows: minmax(340px, auto) minmax(220px, 28vw);
+    gap: clamp(10px, 1.6vw, 16px);
+    min-height: 0;
+  }
+
+  .consulting-room__copy {
+    grid-column: 1;
+    grid-row: 1;
+    padding: clamp(20px, 3vw, 34px) clamp(8px, 2vw, 22px) clamp(20px, 3vw, 34px) 0;
+  }
+
+  figure.consulting-room__photo.consulting-room__photo--main:nth-of-type(1),
+  figure.consulting-room__photo.consulting-room__photo--detail:nth-of-type(2),
+  figure.consulting-room__photo.consulting-room__photo--detail:nth-of-type(3) {
+    width: auto !important;
+    max-width: 100% !important;
+    translate: none !important;
+    --dev-x: 0px !important;
+    --dev-y: 0px !important;
+  }
+
+  .consulting-room__photo--main {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .consulting-room__photo--detail {
+    grid-column: auto;
+    grid-row: 2;
+  }
+
+  #consulting-room-title,
+  p.consulting-room__text:nth-of-type(2) {
+    width: auto !important;
+    max-width: 100% !important;
+  }
+}
+
+/*
+ * Notebook: usa a grade desktop, mas sem as larguras e os deslocamentos
+ * absolutos do editor visual que quebravam as imagens entre 1101 e 1374 px.
+ */
+@media (min-width: 1101px) and (max-width: 1374px) {
+  .consulting-room__grid {
+    grid-template-columns: minmax(230px, 0.78fr) minmax(0, 1.75fr) minmax(200px, 1.06fr);
+    gap: clamp(10px, 1.1vw, 14px);
+    min-height: clamp(500px, 50vw, 650px);
+  }
+
+  figure.consulting-room__photo.consulting-room__photo--main:nth-of-type(1),
+  figure.consulting-room__photo.consulting-room__photo--detail:nth-of-type(2),
+  figure.consulting-room__photo.consulting-room__photo--detail:nth-of-type(3) {
+    width: auto !important;
+    max-width: 100% !important;
+    translate: none !important;
+    --dev-x: 0px !important;
+    --dev-y: 0px !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .consulting-room {
+    padding: 20px 0 64px;
+  }
+
+  div.container.consulting-room__frame {
+    width: calc(100% - 28px) !important;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .consulting-room__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    gap: 10px;
+  }
+
+  .consulting-room__copy,
+  .consulting-room__photo--main,
+  .consulting-room__photo--detail {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .consulting-room__copy {
+    padding: 28px 8px 26px;
+  }
+
+  .consulting-room__eyebrow {
+    margin-bottom: 20px;
+  }
+
+  .consulting-room h2 {
+    margin-bottom: 22px;
+    font-size: clamp(3rem, 15vw, 4.2rem);
+  }
+
+  .consulting-room__rule {
+    margin-bottom: 22px;
+  }
+
+  .consulting-room__text {
+    margin-bottom: 26px;
+  }
+
+  div.consulting-room__copy > a.button {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .consulting-room__photo {
+    min-height: 0;
+    border-radius: 12px;
+  }
+
+  .consulting-room__photo--main {
+    aspect-ratio: 4 / 3;
+  }
+
+  .consulting-room__photo--detail {
+    aspect-ratio: 3 / 2;
+  }
+
+  .consulting-room__footer {
+    padding: 16px 4px 2px;
+    letter-spacing: 0.24em;
+    line-height: 1.5;
+    white-space: normal;
+  }
+}

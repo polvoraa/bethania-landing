@@ -1,18 +1,14 @@
-{
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "installCommand": "npm install",
-  "outputDirectory": ".next",
+﻿{
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [
         {
           "type": "host",
-          "value": "www.psibethaniasaraiva.com.br"
+          "value": "psibethaniasaraiva.com.br"
         }
       ],
-      "destination": "https://psibethaniasaraiva.com.br/:path*",
+      "destination": "https://www.psibethaniasaraiva.com.br/$1",
       "permanent": true
     }
   ]

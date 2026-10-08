@@ -1,0 +1,414 @@
+    @font-face {
+      font-family: "Cormorant Garamond";
+      src: url("/fonts/cormorant-garamond-400.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Cormorant Garamond";
+      src: url("/fonts/cormorant-garamond-500.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 500;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Cormorant Garamond";
+      src: url("/fonts/cormorant-garamond-600.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 600;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Montserrat";
+      src: url("/fonts/montserrat-400.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 400;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Montserrat";
+      src: url("/fonts/montserrat-500.ttf") format("truetype");
+      font-style: normal;
+      font-weight: 500;
+      font-display: block;
+    }
+    @font-face {
+      font-family: "Montserrat";
+      src: url("/fonts/montserrat-400-italic.ttf") format("truetype");
+      font-style: italic;
+      font-weight: 400;
+      font-display: block;
+    }
+
+    :root {
+      --cream: #efe8d9;
+      --paper: #fbf7ec;
+      --brown: #32230b;
+      --copper: #ad4e20;
+      --line: rgba(173, 78, 32, .68);
+      --serif: "Cormorant Garamond", Georgia, serif;
+      --sans: "Montserrat", Arial, sans-serif;
+      --container: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--brown); }
+    body {
+      margin: 0;
+      color: var(--brown);
+      background: var(--cream);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    figure { margin: 0; }
+    a { color: inherit; }
+    .container { width: min(var(--container), calc(100% - 40px)); margin-inline: auto; }
+    h1, h2, h3, p { margin-top: 0; }
+
+    .hero {
+      padding: clamp(38px, 6vw, 74px) 0 24px;
+      min-height: min(100dvh, 840px);
+    }
+    .hero__heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      align-items: end;
+      gap: 48px;
+      margin-bottom: clamp(30px, 4vw, 48px);
+    }
+    h1 {
+      max-width: 760px;
+      margin-bottom: 0;
+      font-family: var(--serif);
+      font-size: clamp(4.1rem, 7.2vw, 7rem);
+      font-weight: 500;
+      line-height: .78;
+      letter-spacing: -.055em;
+      text-wrap: balance;
+    }
+    .address {
+      justify-self: end;
+      margin: 0 0 6px;
+      font-size: .95rem;
+      line-height: 1.5;
+      text-decoration: none;
+    }
+    .address span { display: block; }
+    .address:hover, .address:focus-visible { text-decoration: underline; }
+    .hero__image {
+      width: min(var(--container), calc(100% - 40px));
+      margin-inline: auto;
+      aspect-ratio: 1447 / 597;
+      overflow: hidden;
+      border-radius: 28px;
+    }
+
+    .intro {
+      padding: clamp(24px, 3vw, 34px) 0;
+      color: var(--paper);
+      background: var(--brown);
+    }
+    .intro__grid {
+      display: grid;
+      grid-template-columns: minmax(300px, .96fr) minmax(300px, .86fr);
+      align-items: center;
+      gap: clamp(48px, 8vw, 100px);
+    }
+    .intro__portrait { aspect-ratio: 712 / 887; overflow: hidden; border-radius: 28px; }
+    .intro__portrait img { object-position: center; }
+    .intro__copy {
+      max-width: 460px;
+      font-family: var(--serif);
+      font-size: clamp(1.55rem, 2.25vw, 2.05rem);
+      line-height: 1.13;
+    }
+    .intro__copy p { margin-bottom: 1.2em; }
+    .intro__copy p:last-child { margin-bottom: 0; }
+
+    .paths { padding: clamp(60px, 7vw, 92px) 0 clamp(44px, 6vw, 72px); }
+    .paths h2 {
+      margin-bottom: clamp(30px, 4vw, 48px);
+      text-align: center;
+      font-family: var(--serif);
+      font-size: clamp(2.45rem, 4.2vw, 4rem);
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: -.035em;
+    }
+    .services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .service {
+      display: grid;
+      grid-template-rows: 220px auto 1fr;
+      overflow: hidden;
+      color: var(--brown);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      transition: transform .35s cubic-bezier(.16, 1, .3, 1), box-shadow .35s cubic-bezier(.16, 1, .3, 1);
+    }
+    .service:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(66, 39, 25, .1); }
+    .service__media { margin: 16px 16px 0; overflow: hidden; border-radius: 10px; }
+    .service h3 {
+      min-height: 108px;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      padding: 20px 24px;
+      color: var(--copper);
+      font-family: var(--serif);
+      font-size: clamp(1.7rem, 2.1vw, 2.15rem);
+      font-weight: 500;
+      line-height: 1.02;
+      text-align: center;
+      border-bottom: 1px solid rgba(173, 78, 32, .28);
+    }
+    .service p { margin: 0; padding: 20px 26px 30px; font-size: .94rem; line-height: 1.55; text-align: center; }
+
+    .consulting-room {
+      padding: clamp(30px, 4vw, 56px) 0 clamp(72px, 8vw, 110px);
+      background: var(--cream);
+    }
+    .consulting-room__frame {
+      padding: clamp(22px, 3vw, 42px);
+      border: 1px solid rgba(50, 35, 11, .18);
+      border-radius: 24px;
+    }
+    .consulting-room__grid {
+      display: grid;
+      grid-template-columns: minmax(250px, .78fr) minmax(0, 1.75fr) minmax(220px, 1.06fr);
+      grid-template-rows: repeat(2, minmax(210px, 1fr));
+      gap: 14px;
+      min-height: clamp(520px, 52vw, 680px);
+    }
+    .consulting-room__copy {
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(14px, 2vw, 26px) clamp(8px, 1.6vw, 20px) clamp(14px, 2vw, 26px) 0;
+    }
+    .consulting-room__eyebrow {
+      margin-bottom: clamp(22px, 3vw, 36px);
+      font-size: .66rem;
+      font-weight: 500;
+      letter-spacing: .48em;
+      text-transform: uppercase;
+    }
+    .consulting-room h2 {
+      max-width: 340px;
+      margin-bottom: 28px;
+      font-family: var(--serif);
+      font-size: clamp(3.2rem, 4.8vw, 5rem);
+      font-weight: 500;
+      line-height: .87;
+      letter-spacing: -.05em;
+    }
+    .consulting-room h2 em {
+      color: #805b3c;
+      font-weight: 400;
+    }
+    .consulting-room__rule {
+      width: 52px;
+      height: 1px;
+      margin-bottom: 28px;
+      background: rgba(128, 91, 60, .75);
+    }
+    .consulting-room__text {
+      max-width: 30ch;
+      margin-bottom: 30px;
+      color: rgba(50, 35, 11, .76);
+      font-size: .94rem;
+      line-height: 1.65;
+    }
+    .consulting-room__photo {
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #d8cdbb;
+    }
+    .consulting-room__photo--main { grid-row: 1 / 3; }
+    .consulting-room__photo img {
+      transition: transform .6s cubic-bezier(.16, 1, .3, 1);
+    }
+    .consulting-room__photo:hover img { transform: scale(1.025); }
+    .consulting-room__footer {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 28px;
+      padding: 24px 4px 0;
+      color: rgba(50, 35, 11, .62);
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .42em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .consulting-room__footer::before { content: "Um espaço para a sua história"; }
+    .consulting-room__footer::after { content: "Bethania Saraiva, Psicóloga Clínica"; }
+    .consulting-room__footer-line { height: 1px; background: rgba(50, 35, 11, .25); }
+
+    .about {
+      padding: clamp(40px, 5vw, 66px) 0 clamp(100px, 13vw, 170px);
+      color: var(--paper);
+      background: var(--brown);
+    }
+    .about__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+      gap: clamp(26px, 4vw, 46px);
+      align-items: stretch;
+    }
+    .about__photo, .about__panel { min-height: 600px; border-radius: 30px; overflow: hidden; }
+    .about__photo img { object-position: center top; }
+    .about__panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(34px, 5vw, 62px);
+      color: var(--brown);
+      background: var(--paper);
+    }
+    .about h2 {
+      margin-bottom: 40px;
+      font-family: var(--serif);
+      font-size: clamp(4rem, 7vw, 6.6rem);
+      font-weight: 600;
+      line-height: .8;
+      letter-spacing: -.05em;
+    }
+    .about__text { max-width: 500px; margin-bottom: 42px; font-size: .98rem; font-style: italic; line-height: 1.6; }
+
+    .button {
+      display: inline-flex;
+      width: fit-content;
+      min-height: 50px;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 38px;
+      color: var(--paper);
+      background: var(--brown);
+      border: 1px solid var(--brown);
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color .25s ease, background-color .25s ease, transform .25s ease;
+    }
+    .button:hover, .button:focus-visible { color: var(--brown); background: transparent; }
+    .button:active { transform: translateY(1px) scale(.98); }
+
+    .footer {
+      position: relative;
+      min-height: 270px;
+      padding: 62px 0 0;
+      color: var(--paper);
+      background: var(--brown);
+      overflow: hidden;
+    }
+    .footer__inner { position: relative; z-index: 1; }
+    .footer .button { color: var(--paper); border-color: var(--paper); }
+    .footer .button:hover, .footer .button:focus-visible { color: var(--brown); background: var(--paper); }
+    .footer__wordmark {
+      margin: 22px 0 -52px;
+      color: var(--cream);
+      font-family: var(--serif);
+      font-size: clamp(8rem, 20vw, 18rem);
+      font-weight: 500;
+      line-height: .65;
+      letter-spacing: -.075em;
+      white-space: nowrap;
+      transform: translateX(8%);
+    }
+    .legal {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      gap: 32px;
+      padding: 9px 16px;
+      color: #f5f2e9;
+      background: #171512;
+      font-size: .65rem;
+    }
+    .legal a { text-decoration: none; }
+    .legal a:hover { text-decoration: underline; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .75s cubic-bezier(.16, 1, .3, 1), transform .75s cubic-bezier(.16, 1, .3, 1);
+    }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .hero { min-height: auto; }
+      .hero__heading { grid-template-columns: 1fr; gap: 26px; }
+      .address { justify-self: start; }
+      .intro__grid, .about__grid { grid-template-columns: 1fr; }
+      .intro__copy { max-width: 680px; }
+      .services { grid-template-columns: 1fr; max-width: 590px; margin-inline: auto; }
+      .service { grid-template-rows: 280px auto 1fr; }
+      .service h3 { min-height: auto; }
+      .consulting-room__grid {
+        grid-template-columns: minmax(210px, .8fr) minmax(0, 1.2fr);
+        grid-template-rows: minmax(280px, .9fr) repeat(2, minmax(210px, .55fr));
+        min-height: 0;
+      }
+      .consulting-room__copy { grid-row: 1; }
+      .consulting-room__photo--main { grid-row: 1; }
+      .consulting-room__photo--detail { grid-column: 1 / 3; }
+      .consulting-room__footer { grid-template-columns: 1fr; gap: 10px; white-space: normal; }
+      .consulting-room__footer::after { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .container { width: min(100% - 28px, var(--container)); }
+      .hero { padding-top: 30px; }
+      h1 { font-size: clamp(3.4rem, 17vw, 5rem); line-height: .82; }
+      .hero__image { width: calc(100% - 28px); height: 310px; border-radius: 20px; }
+      .intro { padding-block: 14px 54px; }
+      .intro__grid { gap: 38px; }
+      .intro__portrait { min-height: 0; aspect-ratio: .91; border-radius: 20px; }
+      .intro__copy { font-size: 1.45rem; }
+      .paths h2 { text-align: left; }
+      .service { grid-template-rows: 220px auto 1fr; }
+      .consulting-room { padding: 14px 0 64px; }
+      .consulting-room__frame { padding: 14px; border-radius: 20px; }
+      .consulting-room__grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 390px repeat(2, 250px);
+        gap: 10px;
+      }
+      .consulting-room__copy,
+      .consulting-room__photo--main,
+      .consulting-room__photo--detail { grid-column: 1; grid-row: auto; }
+      .consulting-room__copy { padding: 34px 8px 30px; }
+      .consulting-room h2 { max-width: 320px; font-size: clamp(3.5rem, 16vw, 4.6rem); }
+      .consulting-room__text { max-width: 34ch; }
+      .consulting-room__photo { border-radius: 13px; }
+      .consulting-room__footer { padding: 18px 4px 2px; font-size: .52rem; letter-spacing: .32em; }
+      .about__photo, .about__panel { min-height: 0; border-radius: 22px; }
+      .about__photo { aspect-ratio: .92; }
+      .about__panel { padding: 38px 28px; }
+      .about h2 { margin-bottom: 28px; font-size: 4.2rem; }
+      .button { width: 100%; }
+      .footer { min-height: 220px; }
+      .footer__wordmark { margin-top: 52px; font-size: 8.5rem; transform: translateX(-2%); }
+      .legal { flex-wrap: wrap; gap: 8px 22px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }

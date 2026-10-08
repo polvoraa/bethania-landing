@@ -1,15 +1,3 @@
-﻿{
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "psibethaniasaraiva.com.br"
-        }
-      ],
-      "destination": "https://www.psibethaniasaraiva.com.br/:path*",
-      "permanent": true
-    }
-  ]
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }

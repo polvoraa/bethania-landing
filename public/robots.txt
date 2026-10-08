@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://psibethaniasaraiva.com.br/sitemap.xml
+Host: https://psibethaniasaraiva.com.br

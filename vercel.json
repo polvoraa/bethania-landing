@@ -1,14 +1,14 @@
 ﻿{
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "psibethaniasaraiva.com.br"
         }
       ],
-      "destination": "https://www.psibethaniasaraiva.com.br/$1",
+      "destination": "https://www.psibethaniasaraiva.com.br/:path*",
       "permanent": true
     }
   ]
